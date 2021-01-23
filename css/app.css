@@ -1,0 +1,444 @@
+/* Styles for the main app
+ * By Griffith
+ */
+::-moz-selection {
+  background: #50eb7e linear-gradient(80deg, #32d395, #77df3b, #e4f07e) !important;
+}
+::selection {
+  background: #50eb7e linear-gradient(80deg, #32d395, #77df3b, #e4f07e) !important;
+}
+
+/* Works on Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #FFFC #0000;
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #0000;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #FFFC;
+  border-radius: 20px;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-weight: 500;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, Noto Sans, sans-serif;
+}
+
+main {
+  width: 100vw;
+  height: 100vh;
+  background-image: radial-gradient(closest-corner at 50% 70%, #AAA, #f0f0f0);
+}
+
+.side-container {
+  position: fixed;
+  max-width: 20em;
+  width: 30%;
+  min-width: 12em;
+  top: 0px;
+  left: 0px;
+  margin: 2em;
+}
+
+#functionContainer {
+  background: #0000;
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
+  border-radius: 1em;
+  color: #000C;
+  font-size: smaller;
+  max-height: calc(100vh - 8em);
+  overflow: auto;
+}
+
+#functionContainer .function {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  border-radius: inherit;
+  width: 100%;
+  padding: 1em;
+}
+
+#functionContainer .function label {
+  display: inline-block;
+  border: none;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  width: 1.5em;
+  height: 1.5em;
+  border-radius: 0.75em;
+  color: #FFFC;
+  padding-left: .6em;
+  margin-right: .5em;
+  font-style: italic;
+}
+
+#functionContainer .function input[type="text"] {
+  border: none;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  width: calc(100% - 5em);
+  height: 1.5em;
+  background-color: #FFFC;
+  border-radius: 0.2em;
+  color: inherit;
+  padding: .1em;
+  margin-bottom: .5em;
+  font-weight: 500;
+}
+
+#functionContainer .function button {
+  border: none;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  background-color: #FFFC;
+  border-radius: 0.75em;
+  color: inherit;
+  padding: .0em;
+  padding-top: 0;
+  margin-left: .5em;
+  font-weight: 500;
+  translate: 0 .2em;
+}
+
+#functionContainer .function button .material-icons {
+  font-size: small;
+  display: block;
+}
+
+button#addFunction {
+  padding: .5em;
+  border: none;
+  background-color: #0000;
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
+  color: #000C;
+  font-size: 130%;
+  border-radius: 1em;
+  margin-top: .5em;
+  font-weight: normal;
+}
+
+#mainControls {
+  position: fixed;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  max-width: 70%;
+  bottom: 1em;
+  left: calc(50% - 10em);
+  border-radius: 1em;
+  padding: .5em;
+  background-color: #0000;
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
+  font-size: .7em;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+#mainControls .dragger {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  width: 6em;
+  height: 6em;
+  margin: .25em;
+  border-radius: .5em;
+  background-color: #FFFC;
+  text-align: center;
+  padding: .2em;
+  padding-top: 1em;
+}
+
+#mainControls .dragger .dragger-name {
+  display: block;
+}
+
+#mainControls .dragger .dragger-value {
+  display: block;
+}
+
+#mainControls .dragger .material-icons {
+  translate: 0 .3em;
+}
+
+#phoneWarning {
+  font-size: smaller;
+}
+
+@media only screen and (min-width: 600px) {
+  #phoneWarning {
+    display: none;
+  }
+}
+
+#variables {
+  position: fixed;
+  top: 0;
+  right: 0;
+  margin: 2em;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  border-radius: 1em;
+  padding: 0em .5em .5em .5em;
+  background-color: #0000;
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
+  font-size: .6em;
+  max-height: calc(100vh - 4em);
+}
+
+#variables .dragger {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  width: 7em;
+  margin-top: .5em;
+  border-radius: .5em;
+  background-color: #FFFC;
+  text-align: center;
+  padding: 0;
+  padding-bottom: .6em;
+}
+
+#variables .dragger .dragger-name {
+  display: inline-block;
+  font-size: larger;
+  width: 1em;
+}
+
+#variables .dragger .dragger-name::after {
+  content: "";
+}
+
+#variables .dragger .material-icons {
+  translate: 0 .3em;
+}
+
+#save {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  margin: 1em;
+  border: none;
+  background-color: #0000;
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
+  color: #000C;
+  font-size: 130%;
+  padding: .5em;
+  border-radius: 1em;
+  font-weight: normal;
+}
+
+#save div {
+  display: none;
+  position: absolute;
+  width: 9em;
+  bottom: 0;
+  left: 0;
+  padding-bottom: 100%;
+  border-radius: .5em;
+  background-color: #0000;
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
+  font-size: medium;
+  z-index: -1;
+}
+
+#save div button {
+  display: block;
+  width: 100%;
+  font-size: smaller;
+  border: none;
+  background-color: #FFFC;
+  padding: .5em;
+  padding-top: 0;
+  margin: .3em;
+  border-radius: .5em;
+}
+
+#save div button .material-icons {
+  translate: 0 .25em;
+  margin-right: .2em;
+}
+
+#save:hover > div, #save:active > div {
+  display: block;
+}
+
+#help {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  margin: 1em;
+  border: none;
+  background-color: #0000;
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
+  color: #000C;
+  font-size: 130%;
+  border-radius: 1em;
+  font-weight: normal;
+}
+
+#help div {
+  display: none;
+  position: absolute;
+  width: 50vw;
+  min-width: 250px;
+  padding: 1em;
+  margin-bottom: 0%;
+  bottom: 0;
+  right: 0;
+  border-radius: 1em;
+  background-color: #FFFC;
+  font-size: medium;
+}
+
+#help div button {
+  font-size: medium;
+  margin-top: 1em;
+}
+
+#help:hover > div, #help:active > div {
+  display: block;
+}
+
+#help, #addFunction, #save {
+  -webkit-box-sizing: content-box;
+          box-sizing: content-box;
+  width: 24px;
+  height: 24px;
+  padding: .5em;
+}
+
+#help .material-icons, #addFunction .material-icons, #save .material-icons {
+  translate: 0 -.2em;
+}
+
+#titleScreen, #tutorials {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #0000;
+  -webkit-backdrop-filter: blur(5px);
+          backdrop-filter: blur(5px);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  z-index: 1;
+}
+
+#titleScreen button, #tutorials button {
+  font-size: medium;
+  font-weight: bold;
+}
+
+#titleScreen #title, #titleScreen #quick, #titleScreen #advanced, #tutorials #title, #tutorials #quick, #tutorials #advanced {
+  background-color: #FFFC;
+  border-radius: 1em;
+  padding: 1em;
+  max-width: 50%;
+  min-width: 250px;
+}
+
+#titleScreen #title, #tutorials #title {
+  text-align: center;
+}
+
+#titleScreen #title h1, #tutorials #title h1 {
+  display: inline;
+}
+
+#titleScreen #title .subtitle, #tutorials #title .subtitle {
+  font-size: smaller;
+}
+
+#titleScreen #title img, #tutorials #title img {
+  translate: -.5em 1em;
+  display: inline;
+}
+
+#tutorials {
+  display: none;
+}
+
+#tutorials #quick, #tutorials #advanced {
+  display: none;
+}
+
+#tutorials #quick > div, #tutorials #advanced > div {
+  display: none;
+}
+
+input[type="range"] {
+  background-color: transparent !important;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  border: none;
+  border-radius: .5em;
+  background-image: linear-gradient(60deg, #32d395, #77df3b, #e4f07e);
+}
+
+input[type="range"]::-moz-range-thumb {
+  border: none;
+  border-radius: .5em;
+  background-image: linear-gradient(60deg, #32d395, #77df3b, #e4f07e);
+}
+
+input[type="range"]::-moz-range-track {
+  height: 0.2em;
+  background-color: #FFFC;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 0.2em;
+  background-color: #FFFC;
+}
+
+button {
+  border: none;
+  background-color: #FFFC;
+  padding: .3em .7em;
+  border-radius: .3em;
+}
+
+button:hover {
+  background: #50dd33 linear-gradient(60deg, #32d395, #77df3b, #e4f07e);
+}
+
+button:active {
+  background: #ccc8 !important;
+}
+/*# sourceMappingURL=app.css.map */

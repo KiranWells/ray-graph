@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <!-- <script src="https://cdn.jsdelivr.net/npm/stats-js@1.0.1/build/stats.min.js"></script> -->
+  <script src="scripts/src/jquery-3.3.1.min.js"></script>
+  <script src="scripts/webglutils.js"></script>
+  <script src="scripts/elements.js"></script>
+  <script src="scripts/app.js"></script>
+  <script src="scripts/tutorials.js" defer="defer"></script>
+  <title>RayGraph</title>
+</head>
+<body>
+  <div id="titleScreen">
+    <div id="title">
+      <img src="favicon.png" alt="Logo" width="64" height="64">
+      <h1>RayGraph</h1>
+      <p class="subtitle">A Raytraced 3D Graphing Utility</p>
+      <p>By using a customing rendering engine, this program can graph 
+        nearly any equation you can think of. No need to solve for z!</p>
+        <p id="phoneWarning">
+          Warning: you seem to be using this with a small
+          device. Unfortunately, this application is not fully stable on some
+          phones. There may be some visual artifacting; I am working to fix this.
+        </p>
+        <button id="quickStart">
+          Quick Start
+        </button>
+        <button id="advancedTutorial">
+          Advanced Tutorial
+        </button>
+        <button id="skip">
+          Skip
+        </button>
+    </div>
+  </div>
+  <main>
+    <canvas id="appScreen">
+      Your browser does not support canvas. 
+      Please use a recent version of a major 
+      browser, ex: Firefox.
+    </canvas>
+  </main>
+  <div id="tutorials">
+    <div id="quick">
+      <div id="qslide1">
+        <h2>Quick Start</h2>
+        <p>This quick start will show you the basic features of the program</p>
+      </div>
+      <div id="qslide2">
+        <h3>Functions</h3>
+        <p>
+          Each equation in the upper left corner can be edited to any 
+          valid math equation. You can use most normal math symbols, 
+          including polar coordinates and trig.
+        </p>
+        <p>
+          Press the + button beneath the functions to add a new equation. 
+          The colors of the circular badge beside each equation will 
+          adjust to match the shapes on screen.
+        </p>
+      </div>
+      <div id="qslide2">
+        <h3>Variables</h3>
+        <p>
+          Each variable in the top right bar can be changed by 
+          clicking and dragging or scrolling.
+        </p>
+        <p>
+          New variables appear when you use them in an equation. Variables can
+          be used in multiple functions; they will all hold the same value.
+        </p>
+      </div>
+      <div id="qslide3">
+        <h3>Settings</h3>
+        <p>
+          The settings bar on the bottom controls the way the graph looks, and 
+          each one can be changed just like the variables.
+        </p>
+        <p>
+          Precision changes how accurate the graph is; 
+          the higher it is, the fewer errors, but the more 
+          processing power that is required.
+        </p>
+        </p>
+      </div>
+      <div id="qslide4">
+        <h3>One last thing:</h3>
+        <p>Here are a few tips to get started:</p>
+        <ul>
+          <li>If the function disappears, try increasing size or adding in a variable to experiment with</li>
+          <li>Use division sparingly. The computer doesn't like dividing by 0, so try multiplying both sides to cancel out division</li>
+          <li>Enjoy!</li>
+        </ul>
+        </p>
+      </div>
+      <button class="back">Back</button>
+      <button class="next">Next</button>
+    </div>
+    <div id="advanced">
+      <div id="aslide1">
+        <h2>Advanced Tutorial</h2>
+        <p>This tutorial will show you all the features of the program.</p>
+        </p>
+      </div>
+      <div id="aslide2">
+        <h3>Controls</h2>
+        <p>There are only a few main controls, but they aim to be as flexible as possible.</p>
+        <p>In the top left corner is the function bar. It holds all of the various equations you are 
+          currently graphing. Beneath it is the add function button. In the top right is that variable 
+          bar. This holds all of the variables that you include in your functions. On the bottom is the 
+          settings bar. It holds the global settings that control the look and feel of the grapher.</p>
+        <p>In the bottom left is the save button. It allows you to save a url link to the functions you are 
+          using or to download a transparent picture of the function. In the bottom right is a help button.
+          Hovering over it shows a quick help text detailing the things you can put in a function. An speaking of...</p>
+      </div>
+      <div id="aslide3">
+        <h3>Functions</h2>
+        <p>
+          Functions each have three parts. A colored badge on the left shows the color that the equation will 
+          display in the 3d viewport. The text input in the middle allows you to type an equation, and the x on 
+          the right will delete the function.
+        </p>
+        <p>New functions can be added by clicking the "+" button beneath the function list.</p>
+        <p>
+          An equation can include specific variables and mathematic operations, as long as it is valid mathematically.
+          Special variables include x, y, z, r, rho, theta, and phi (and pi, e). The rest of the letters will 
+          be represented as constants, which can be changed in the variables bar. 
+        </p>
+      </div>
+      <div id="aslide4">
+        <h3>Functions - Cont...</h3>
+        <p>
+          Some special functions are also 
+          available, including trigonometric functions and others such as: ln, round, floor, mod, step, and smoothstep.
+          (The last few are only included because they work by default. If you are unfamiliar with them, you can check 
+          the GLSL reference pages for each). Inverse trig functions have a- or arc- as a prefix (acos, arctan); hyperbolic 
+          have -h as a suffix (sinh).
+        </p>
+        <p>
+          Normal math symbols also work, including +, -, *, and /. Exponentiation is ^, and sqrt is avilable, 
+          but ^0.5 is more stable. Dividing by a special variable will often lead to artifacts in the image; try to
+          multiply both sides to eliminate it. Theta and Phi are defined from -2pi to 2pi. R is sqrt(x^2 + y^2), and 
+          rho is the radius in 3 dimensions (sqrt(x^2 + y^2 + z^2)).
+        </p>
+      </div>
+      <div id="aslide5">
+        <h3>Variables</h3>
+        <p>
+          Up in the top right corner is the variables bar. This will hold all the letters which are treated as constants
+          in the equation. Clicking and dragging (or scrolling) these boxes will change the value of that number across
+          all functions. New variables will appear as soon as you use them in an equation. 
+        </p>
+        <p>
+          Variables are a great way to see how different numbers can affect a function. For example, using the equation 
+          'y = mx + b' will allow you to visually see how different slopes (m) and y-intercepts (b) affect the shape of the 
+          line. Or, for a more detailed example, try '(x-a)^2/f^2 + (y-b)^2/f^2 = (z - d)^2/c^2' to see how each constant affects
+          the shape of a cone.
+        </p>
+      </div>
+      <div id="aslide6">
+        <h3>Settings</h3>
+        <p>
+          The settings bar at the bottom allows you to manipulate the way that the program functions. The size slider
+          changes the size of the area that the graph displays. This is limited by default to improve performance and 
+          visibility. The line width slider sets how wide the lines of the coordinate plane are, from 0 width (hidden)
+          to 1 width (solid planes).
+        </p>
+        <p>
+          The precision slider changes how accurate the graph is. This is low by default to improve performance, and 
+          should only need increasing if strange artifacts appear in the graph's shape. This generally happens when there are
+          very small details. Increasing this slider should fix that, but it will cost performance on some machines.
+        </p>
+      </div>
+      <div id="aslide7">
+        <h3>Save</h3>
+        <p>
+          The save button in the bottom left will allow you to save the current equations you are looking at. 
+          The "Copy URL" option will copy a shareable URL to the clipboard with the current equations and the 
+          camera position. The "Download" button will open a new tab with a transparent-background PNG image
+          of what is currently being displayed.
+        </p>
+      </div>
+      <div id="aslide8">
+        <h3>One last thing:</h3>
+        <p>Here are a few tips to get started:</p>
+        <ul>
+          <li>If the function disappears, try increasing size or adding in a variable to experiment with</li>
+          <li>Use division sparingly. The computer doesn't like dividing by 0, so try multiplying both sides to cancel out division</li>
+          <li>Enjoy!</li>
+        </ul>
+        </p>
+      </div>
+      <button class="back">Back</button>
+      <button class="next">Next</button>
+    </div>
+    </div>
+  </div>
+  <div class="side-container">
+    <div id="functionContainer">
+    </div>
+    <button id="addFunction"><i class="material-icons">add_box</i></button>
+  </div>
+  <div id="mainControls">
+  </div>
+  <div id="variables">
+  </div>
+  <div id="help">
+    <i class="material-icons">help</i>
+    <!-- TODO: add help message and possibly a tutorial -->
+    <div>
+      The function box will accept any input that is a valid equation.
+      Letters (aside from x,y,z, and r) are variables that can be adjusted
+      using the boxes on the side. You can use the following special names in an equation:
+      <ul>
+        <li>x, y, and z</li>
+        <li>r (= sqrt(x<sup>2</sup> + y<sup>2</sup>))</li>
+        <li>rho, theta, and phi</li>
+      </ul>
+      In addition, most trig functions are available, including sin, 
+      arctan, and cosh (hyperbolic cos). Some other functions, such as 
+      round, floor, and mod are also allowed.<br>
+      <button id="showTutorial">Tutorial</button>
+    </div>
+  </div>
+  <div id="save">
+    <i class="material-icons">save</i>
+    <div>
+      <button id="download"><i class="material-icons">save_alt</i> Download</button>
+      <button id="link"><i class="material-icons">link</i>Copy Link</button>
+    </div>
+  </div>
+</body>
+</html>

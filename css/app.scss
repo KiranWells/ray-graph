@@ -1,0 +1,429 @@
+/* Styles for the main app
+ * By Griffith T
+ */
+
+$mainBack: #0000;
+$mainColor: #000C;
+$blur: blur(20px);
+$innerBack: #FFFC;
+$gradient1: rgb(50, 211, 149), rgb(119, 223, 59), rgb(228, 240, 126);
+
+::selection {
+  background: rgb(80, 235, 126) linear-gradient(80deg, $gradient1) !important;
+}
+
+$scrollBack: $mainBack;
+$scrollColor: $innerBack;
+
+/* Works on Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: $scrollColor $scrollBack;
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: $scrollBack;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: $scrollColor;
+  border-radius: 20px;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-weight: 500;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, Noto Sans, sans-serif;
+}
+
+main {
+  width: 100vw;
+  height: 100vh;
+  background-image: radial-gradient(closest-corner at 50% 70%,#AAA, #f0f0f0);
+}
+
+.side-container {
+  position: fixed;
+  max-width: 20em;
+  width: 30%;
+  min-width: 12em;
+  top: 0px;
+  left: 0px;
+  margin: 2em;
+}
+
+#functionContainer {
+  background: $mainBack;
+  backdrop-filter: $blur;
+  border-radius: 1em;
+  color: $mainColor;
+  font-size: smaller;
+  max-height: calc(100vh - 8em);
+  overflow: auto;
+
+  .function {
+    box-sizing: border-box;
+    border-radius: inherit;
+    width: 100%;
+    // background: #FFF2;
+    padding: 1em;
+
+    label {
+      display: inline-block;
+      border: none;
+      box-sizing: border-box;
+      width: 1.5em;
+      height: 1.5em;
+      border-radius: 0.75em;
+      color: $innerBack;
+      padding-left:  .6em;
+      margin-right: .5em;
+      font-style: italic;
+    }
+    
+    input[type="text"] {
+      border: none;
+      box-sizing: border-box;
+      width: calc(100% - 5em);
+      height: 1.5em;
+      background-color: $innerBack;
+      border-radius: 0.2em;
+      color: inherit;
+      padding: .1em;
+      margin-bottom: .5em;
+      font-weight: 500;
+    }
+
+    button {
+      border: none;
+      box-sizing: border-box;
+      width: 24px;
+      height: 24px;
+      background-color: $innerBack;
+      border-radius: 0.75em;
+      color: inherit;
+      padding: .0em;
+      padding-top: 0;
+      margin-left: .5em;
+      font-weight: 500;
+      translate: 0 .2em;
+
+      .material-icons {
+        font-size: small;
+        display: block;
+      }
+    }
+  }
+}
+
+button#addFunction {
+  // width: 2em;
+  // height: 2em;
+  padding: .5em;
+  border: none;
+  background-color: $mainBack;
+  backdrop-filter: $blur;
+  color: $mainColor;
+  font-size: 130%;
+  border-radius: 1em;
+  margin-top: .5em;
+  font-weight: normal;
+}
+
+#mainControls {
+  position: fixed;
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 70%;
+  // margin-right: calc(50% - 10em);
+  bottom: 1em;
+  left: calc(50% - 10em);
+  border-radius: 1em;
+  padding: .5em;
+  background-color: $mainBack;
+  backdrop-filter: $blur;
+  font-size: .7em;
+  justify-content: center;
+
+  .dragger {
+    box-sizing: border-box;
+    width: 6em;
+    height: 6em;
+    // margin-right: .5em;
+    margin: .25em;
+    border-radius: .5em;
+    background-color: $innerBack;
+    text-align: center;
+    padding: .2em;
+    padding-top: 1em;
+
+    .dragger-name {
+      display: block;
+    }
+
+    .dragger-value {
+      display: block;
+    }
+
+    .material-icons {
+      translate: 0 .3em;
+    }
+  }
+}
+
+#phoneWarning {
+  font-size: smaller;
+}
+
+@media only screen and (min-width: 600px) {
+  #phoneWarning {
+    display: none;
+  }
+}
+
+#variables {
+  position: fixed;
+  top: 0;
+  right: 0;
+  margin: 2em;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1em;
+  padding: 0em .5em .5em .5em;
+  background-color: $mainBack;
+  backdrop-filter: $blur;
+  font-size: .6em;
+  max-height: calc(100vh - 4em);
+
+  .dragger {
+    box-sizing: border-box;
+    width: 7em;
+    // height: 5em;
+    margin-top: .5em;
+    border-radius: .5em;
+    background-color: $innerBack;
+    text-align: center;
+    padding: 0;
+    padding-bottom: .6em;
+
+    .dragger-name {
+      display: inline-block;
+      font-size: larger;
+      width: 1em;
+    }
+
+    .dragger-name::after {
+      content: "";
+    }
+
+    .material-icons {
+      translate: 0 .3em;
+    }
+  }
+}
+
+#save {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  margin: 1em;
+  border: none;
+  background-color: $mainBack;
+  backdrop-filter: $blur;
+  color: $mainColor;
+  font-size: 130%;
+  padding: .5em;
+  border-radius: 1em;
+  font-weight: normal;
+
+  div {
+    display: none;
+    position: absolute;
+    width: 9em;
+    bottom: 0;
+    left: 0;
+    padding-bottom: 100%;
+    border-radius: .5em;
+    background-color: $mainBack;
+    backdrop-filter: $blur;
+    font-size: medium;
+    z-index: -1;
+
+    button {
+      display: block;
+      width: 100%;;
+      font-size: smaller;
+      border: none;
+      background-color: $innerBack;
+      padding: .5em;
+      padding-top: 0;
+      margin: .3em;
+      border-radius: .5em;
+
+      .material-icons {
+        translate: 0 .25em;
+        margin-right: .2em;
+      }
+    }
+  }
+}
+
+#save:hover > div, #save:active > div {
+  display: block;
+}
+
+#help {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  margin: 1em;
+  border: none;
+  background-color: $mainBack;
+  backdrop-filter: $blur;
+  color: $mainColor;
+  font-size: 130%;
+  border-radius: 1em;
+  font-weight: normal;
+
+  div {
+    display: none;
+    position: absolute;
+    width: 50vw;
+    min-width: 250px;
+    padding: 1em;
+    margin-bottom: 0%;
+    bottom: 0;
+    right: 0;
+    border-radius: 1em;
+    background-color: $innerBack;
+    font-size: medium;
+
+    button {
+      font-size: medium;
+      margin-top: 1em;
+    }
+  }
+}
+
+#help:hover > div, #help:active > div {
+  display: block;
+}
+
+#help, #addFunction, #save {
+  box-sizing: content-box;
+  width: 24px;
+  height: 24px;
+  padding: .5em;
+
+  .material-icons {
+    translate: 0 -.2em;
+  }
+}
+
+#titleScreen, #tutorials {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: $mainBack;
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+
+  button {
+    font-size: medium;
+    font-weight: bold;
+  }
+
+  #title, #quick, #advanced {
+    background-color: $innerBack;
+    border-radius: 1em;
+    padding: 1em;
+    max-width: 50%;
+    min-width: 250px;
+  }
+
+  #title {
+    text-align: center;
+
+    h1 {
+      display: inline;
+    }
+    .subtitle {
+      font-size: smaller;
+    }
+    img {
+      translate: -.5em 1em;
+      display: inline;
+    }
+  }
+}
+
+#tutorials {
+  display: none;
+
+  #quick, #advanced {
+    display: none;
+  }
+
+  #quick>div, #advanced>div {
+    display: none;
+  }
+}
+
+
+@mixin thumb {
+  border: none;
+  border-radius: .5em;
+  background-image: linear-gradient(60deg, $gradient1);
+}
+
+input[type="range"] {
+  background-color: transparent !important;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  @include thumb();
+}
+
+input[type="range"]::-moz-range-thumb {
+  @include thumb();
+}
+
+@mixin slider {
+  height: 0.2em;
+  background-color: $innerBack;
+}
+
+input[type="range"]::-moz-range-track {
+  @include slider;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  @include slider;
+}
+
+button {
+  border: none;
+  background-color: $innerBack;
+  padding: .3em .7em;
+  border-radius: .3em;
+}
+
+button:hover {
+  background: rgb(80, 221, 51) linear-gradient(60deg, $gradient1);
+}
+
+button:active {
+  background: #ccc8 !important;
+}
