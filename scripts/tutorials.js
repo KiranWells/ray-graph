@@ -67,6 +67,7 @@ $("#tutorials").on("click", (e) => {
   if (e.target.id === "tutorials")
     $("#tutorials").css("display", "none");
 });
+
 $("#titleScreen").on("click", (e) => {
   if (e.target.id === "titleScreen")
     $("#titleScreen").css("display", "none");
@@ -83,6 +84,36 @@ $(".next").on("click", () => {
 });
 
 $("#showTutorial").on("click", () => {
+  $("#titleScreen").css("display", "flex");
+  slideN = 0;
+});
+
+$("#skip").on("touchstart", () => {
+  $("#titleScreen").css("display", "none");
+  setMem();
+});
+
+$("#tutorials").on("touchstart", (e) => {
+  if (e.target.id === "tutorials")
+    $("#tutorials").css("display", "none");
+});
+
+$("#titleScreen").on("touchstart", (e) => {
+  if (e.target.id === "titleScreen")
+    $("#titleScreen").css("display", "none");
+});
+
+$(".back").on("touchstart", () => {
+  backSlide();
+  setMem();
+});
+
+$(".next").on("touchstart", () => {
+  nextSlide();
+  setMem();
+});
+
+$("#showTutorial").on("touchstart", () => {
   $("#titleScreen").css("display", "flex");
   slideN = 0;
 });
