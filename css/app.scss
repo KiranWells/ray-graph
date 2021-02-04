@@ -381,6 +381,20 @@ button#addFunction {
   }
 }
 
+.message {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  margin: 2em;
+  max-height: 3em;
+  background-color: $innerBack;
+  text-align: right;
+  padding: .5em;
+  font-size: small;
+  border-radius: .5em;
+  transition: ease .7s;
+  backdrop-filter: $blur;
+}
 
 @mixin thumb {
   border: none;

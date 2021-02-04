@@ -168,6 +168,10 @@ window.onload = function () {
   }
 
   let mainShader = new ComputeShader(canvas);
+  mainShader.onerror = (m) => {
+    message("Invalid function!");
+    console.log(m);
+  };
 
   //load code into each shader
   $.get("shaders/main.frag", function(response){
@@ -515,4 +519,18 @@ window.onload = function () {
 
   $("#link").on("click", link);
 //#endregion input handling
+
+  function message(text) {
+    let m = document.createElement("div");
+    m.classList.add("message");
+    m.innerHTML = text;
+    m.onclick = () => {
+      document.body.removeChild(m);
+    }
+    setTimeout(() => {
+      m.style.opacity = 0;
+      setTimeout(m.onclick, 2000);
+    }, 3000);
+    document.body.appendChild(m);
+  }
 };

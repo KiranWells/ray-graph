@@ -1,5 +1,5 @@
 /* Styles for the main app
- * By Griffith
+ * By Griffith T
  */
 ::-moz-selection {
   background: #50eb7e linear-gradient(80deg, #32d395, #77df3b, #e4f07e) !important;
@@ -399,6 +399,23 @@ button#addFunction {
 
 #tutorials #quick > div, #tutorials #advanced > div {
   display: none;
+}
+
+.message {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  margin: 2em;
+  max-height: 3em;
+  background-color: #FFFC;
+  text-align: right;
+  padding: .5em;
+  font-size: small;
+  border-radius: .5em;
+  -webkit-transition: ease .7s;
+  transition: ease .7s;
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
 }
 
 input[type="range"] {

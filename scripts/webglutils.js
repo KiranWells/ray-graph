@@ -248,6 +248,7 @@ class ComputeShader {
   width = null;
   height = null;
   loaded = false;
+  _onerror = (message) => {console.log(message)};
 
   _time = 0;
 
@@ -288,6 +289,16 @@ class ComputeShader {
   set canvas(canvasEl) {
     this._canvas = canvasEl;
     this.gl = canvasEl.getContext("webgl2");
+  }
+
+  /**
+   * a method to set the canvas and context
+   * @param {Function} onerror
+   */
+  set onerror(onerror) {
+    if (typeof(onerror) !== "function")
+      onerror = (message) => {console.log(message)};
+    this._onerror = onerror;
   }
 
   /**
@@ -414,8 +425,13 @@ class ComputeShader {
     );
     if (!success) {
       console.warn(this.gl.getShaderInfoLog(vertexShader));
-      console.log(this._vertexShaderCode);
       this.gl.deleteShader(vertexShader);
+      let lines = this._code.split("\n");
+      let text = "";
+      for (let i in lines) {
+        text += `${i}: ${lines[i]}\n`
+      }
+      this._onerror("Error in vertex shader:\n\n" + text);
       return success;
     }
 
@@ -430,12 +446,13 @@ class ComputeShader {
     );
     if (!success) {
       console.warn(this.gl.getShaderInfoLog(fragmentShader));
+      this.gl.deleteShader(fragmentShader);
       let lines = this._code.split("\n");
       let text = "";
       for (let i in lines) {
         text += `${i}: ${lines[i]}\n`
       }
-      console.log(text);
+      this._onerror("Error in fragment shader:\n\n" + text);
       return success;
     }
     this._program = this.gl.createProgram();
