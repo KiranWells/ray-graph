@@ -308,8 +308,8 @@ window.onload = function () {
     // except for r,x,y,z
     let specialVars = /(rho|theta|phi|pi)/g;
     let functions = /(sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|log|floor|mod|max|min|step|smoothstep|round|float|int)/g;
-    let keywords = new RegExp(`${specialVars.source}|${functions}`);
-    math_str = math_str.replace(keywords, "_$1_")
+    let keywords = new RegExp(`${specialVars.source}|${functions.source}`, "g");
+    math_str = math_str.replace(keywords, "_$1$2_")
     let keys = math_str.split("_");
     let newKeys = [];
     for (let i in keys) {
