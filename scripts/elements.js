@@ -1,4 +1,12 @@
 /**
+ * A set of custom input elements to handle math and unlimited sliders
+ */
+
+"use strict";
+// depends on MathQuill: https://mathquill.com/
+let MQ = MathQuill.getInterface(2);
+
+/**
  * A custom input element that allows \
  * for unlimited sliders
  * @class
@@ -19,7 +27,7 @@ class Dragger {
    * @param [sensitivity] - the sensitivity
    * @constructor
    */
-  constructor(onchange, name, value, sensitivity, min, max) {
+  constructor(onchange, name, value, sensitivity, min, max, enableMath) {
     value = value || this.value;
     sensitivity = sensitivity || this.sensitivity;
     if (min === undefined || min === null)
@@ -43,6 +51,17 @@ class Dragger {
     let temp4 = document.body.ontouchend || (()=>{});
     document.body.ontouchend = (e) => {temp4(e);this.ondragend(e)};
 
+    this.nameEl = document.createElement("span");
+    this.nameEl.id = name;
+    this.nameEl.innerHTML = name;
+
+    this.element.appendChild(this.nameEl);
+    if (enableMath)
+      MQ.StaticMath(this.nameEl);
+
+    this.valueContainer = document.createElement("div");
+    this.element.appendChild(this.valueContainer);
+
     this.onchange = onchange;
     this.sensitivity = sensitivity;
     this.value = value;
@@ -54,7 +73,7 @@ class Dragger {
   }
 
   setText() {
-    this.element.innerHTML = `<span class="dragger-name">${this.name}</span><span class="dragger-value"><i class="material-icons">unfold_more</i> ${Math.round(this.value * 10) / 10}</span>`
+    this.valueContainer.innerHTML = `<span class="dragger-value"><i class="material-icons">unfold_more</i> ${Math.round(this.value * 10) / 10}</span>`;
   }
 
   ondragstart(e) {
@@ -101,10 +120,12 @@ class Dragger {
 }
 
 class Equation {
-  _value = "z = x^2";
+  _equation = "z = x^2";
   _hue = 0;
+  onchange = () => {};
 
-  constructor (onchange, ondelete, id) {
+  constructor (onchange, ondelete, id, equation) {
+    this.onchange = onchange;
     this.rootelement = document.createElement("div");
     this.rootelement.classList.add("function")
     this.rootelement.id = "equation" + id;
@@ -113,15 +134,9 @@ class Equation {
     this.labelelement.style.backgroundImage = "linear-gradient(60deg, rgb(33, 221, 221), rgb(80, 221, 51), rgb(245, 242, 80))";
     this.labelelement.style.filter = "hue-rotate(" + (this._hue * 360) + "deg)";
     this.rootelement.appendChild(this.labelelement);
-    this.textinput = document.createElement("input");
-    this.textinput.type = "text";
-    this._value=  "r + ax <= " + (id + 1)
-    this.textinput.value = this._value;
-    this.textinput.onchange = (e) => {
-      if (e.target.value == "") {this.delete();}
-      this._value = e.target.value; onchange(this._value);
-    };
-    this.rootelement.appendChild(this.textinput);
+    this.mathinput = document.createElement("span");
+    this._equation= equation || "r + ax \\le " + (id + 1);
+    this._setMath();
     this.closeelement = document.createElement("button");
     this.closeelement.innerHTML = '<i class="material-icons">close</i>';
     this.closeelement.onclick = () => {this.delete();};
@@ -137,6 +152,39 @@ class Equation {
   }
 
   /**
+   * Recreates the MathQuill input to set a new value
+   */
+  _setMath() {
+    if (this.mathField)
+      this.mathField.revert();
+    console.log(this.mathField);
+    this.mathField = MQ.MathField(this.mathinput, {
+      autoCommands: "pi rho theta phi sqrt",
+      // autoFunctions: "sin cos tan asin acos atan arcsin arccos arctan sinh cosh tanh ln log sqrt",
+      supSubsRequireOperand: true,
+      handlers: {
+        edit: () => {
+          var enteredMath = this.mathField.latex(); // Get entered math in LaTeX format
+          this._equation = enteredMath; 
+          // TODO: only recompile on a meaningful edit, 
+          // esp. for many functions - it is slow to compile
+          // onchange(this._value);
+        },
+        enter: () => {
+          if (this._equation == "") {this.delete();}
+          this.onchange(this._equation);
+        },
+        selectOutOf: () => {
+          if (this._equation == "") {this.delete();}
+          this.onchange(this._equation);
+        }
+      }
+    });
+    this.mathField.write(this._equation);
+    this.rootelement.appendChild(this.mathinput);
+  }
+
+  /**
    * Updates the color indicator of the function
    * @param {number} val - the hue to change to
    */
@@ -148,13 +196,15 @@ class Equation {
 
   /**
    * Updates the value of the underlying text input
-   * @param {number} val
+   * @param {String} val
    */
-  set value(val) {
-    this._value = val;
+  set equation(val) {
+    // make sure it will be typed correctly:
+    this._equation = val;
+    this._setMath();
   }
 
   get value() {
-    return this._value;
+    return this._equation;
   }
 }

@@ -5,12 +5,7 @@
  * https://github.com/KiranWells/
  */
 
-#define pi 3.14159265358
-#define MAX_STEPS 1000
-#define MAX_ITERATIONS 16
-#define NORMAL_D 0.01
-
-precision lowp float;
+precision lowp float; // for speed. highp didn't seem to make a difference.
 
 uniform float u_time;
 uniform vec2 u_resolution;
@@ -21,9 +16,23 @@ uniform float u_zoom;
 uniform float u_bounds;
 uniform float u_step_size;
 uniform float u_line_width;
+uniform float u_spacing;
+uniform vec3 u_scale;
 ${variables}
 
+#define pi 3.14159265358979323846264
+#define e 2.7182818284590452353602874713527
+// not the intended way, but this works
+#define u_phi_0 1.618033988749894848204586834
+#define MAX_STEPS 1000
+#define MAX_ITERATIONS 10
+#define NORMAL_D 0.01
+#define DELTA_X 0.0001 * u_bounds
 #define MIN_DIST (u_bounds * u_step_size)
+
+// float number hacks
+#define NaN 0./0.
+#define Inf 1./0.
 
 out vec4 Color;
 
@@ -32,7 +41,7 @@ struct Ray {
   vec3 direction;
 };
 
-// credit for these rotation functions goes to CodeParade in his marble marcher on github
+// credit for these rotation functions goes to CodeParade in his marble marcher on GitHub
 // https://github.com/HackerPoet/MarbleMarcher/blob/master/assets/frag.glsl
 void rotX(inout vec3 z, float a) {
   z.yz = vec2(
@@ -57,39 +66,46 @@ void rotZ(inout vec3 z, float a) {
 
 // fix the issues with negative powers
 float cust_pow(float b, float ex) {
-  if (ex < 0.) {
-    if (mod(ex, 2.) < 0.1) return 1./pow(abs(b), abs(ex));
-    return 1./(pow(abs(b), ex) * (b / abs(b)));
+  float r = pow(b,ex); // check if the power was correct
+  if (b < 0. && r == 0.) {
+    // the power is incorrect for most cases
+    return NaN;
   }
-  if (mod(ex, 2.) < 0.1) return pow(abs(b), ex);
-  return pow(abs(b), ex) * (b / abs(b));
+  return pow(b, ex);
 }
 
 FOREACH {
   float f${i}(vec3 pt) {
+    pt /= u_scale;
     // polar coordinates support
-    // radius
+    // cylindrical radius
     float r = cust_pow(pt.x * pt.x + pt.y * pt.y, 0.5);
+    // spherical radius
     float rho = length(pt);
-    // phi
-    float theta = atan(pt.x/pt.y);
-    // theta
+    float theta = atan(pt.x,pt.y);
     float phi = acos(pt.z/r);
+    // adjust the scale
     return ${eq};
   }
-}
 
-FOREACH {
   bool f_i${i}(vec3 pt) {
+    pt /= u_scale;
     // polar coordinates support
-    // radius
+    // cylindrical radius
     float r = cust_pow(pt.x * pt.x + pt.y * pt.y, 0.5);
+    // spherical radius
     float rho = length(pt);
-    // phi
-    float theta = atan(pt.x/pt.y);
-    // theta
+    float theta = atan(pt.x,pt.y);
     float phi = acos(pt.z/r);
+    // adjust the scale
     return ${ineq};
+  }
+
+  float df${i}(vec3 pt, vec3 d) {
+    // implements a centered first derivative estimation
+    return (f${i}(pt + DELTA_X * d) - f${i}(pt - DELTA_X * d))
+              /
+           (2. * DELTA_X);
   }
 }
 
@@ -153,55 +169,28 @@ bool sphereIntersect(in Ray r, out float depth, out vec3 pos) {
   return true;
 }
 
-// adapted from the Scratchapixel version
-bool cubeIntersect(in Ray r, out float depth, out vec3 n) {
-  float minbox = -u_bounds;
-  float maxbox = u_bounds;
-  vec3 t1 = (minbox - r.origin) / r.direction;
-  vec3 t2 = (maxbox - r.origin) / r.direction;
-  vec3 tmins = min(t1,t2);
-  vec3 tmaxs = max(t1,t2);
-  if ((tmins.x > tmaxs.y) || (tmins.y > tmaxs.x))
-    return false;
-  float tmin = min(tmins.x, tmins.y);
-  float tmax = max(tmaxs.x, tmaxs.y);
-  if ((tmin > tmaxs.z) || (tmins.z > tmax))
-    return false;
-  tmin = min(tmin, tmins.z);
-  tmax = max(tmax, tmaxs.z);
-  depth = abs(tmin);
-  return true;
-}
-
 FOREACH {
-  float binarySearch${i}(in Ray r) {
-    // uses binary search to get closer to the zero
-    float start = -MIN_DIST;
+  float Newton${i}(in Ray r) {
+    float start = -MIN_DIST*1.1;
     float end = 0.;
-    float f_a = f${i}(r.origin + r.direction * start);
-    float f_b = f${i}(r.origin + r.direction * end);
-    float diff = f_a;
-    float c;
+    float c = start;
     for (int i = 0; i < MAX_ITERATIONS; i++) {
-      c = (start + end) * 0.5;
       vec3 p = r.origin + r.direction * c;
-      if (f${i}(p) * diff < 0.0) {
-        //f${i}(a) is the opposite sign of f${i}(c)
-        end = c;
-      } else {
-        start = c;
-      }
+      float a = f${i}(p);
+      float da = df${i}(p, r.direction);
+      c = c - a/da;
+      if (c > end) {return Inf;}
     }
-    return (start + end) * 0.5;
+    if (c < start) return Inf;
+    return c;
   }
 }
 
 bool testPoint(in Ray r, out vec3 pos, out vec3 norm, out float hue) {
-  float mint = 100.;
+  float mint = Inf;
   FOREACH {
-    float t${i} = binarySearch${i}(r);
+    float t${i} = Newton${i}(r);
 
-    if (abs(f${i}(r.origin + r.direction * t${i})) < MIN_DIST * 0.01)
     if (t${i} < mint) {
       mint = t${i};
       hue = ${i}. / (${MAX_I}. - 0.5);
@@ -210,18 +199,18 @@ bool testPoint(in Ray r, out vec3 pos, out vec3 norm, out float hue) {
   pos = r.origin + r.direction * mint;
   // test for outside the bounds
   if (length(pos) > u_bounds) return false;
-  float minf = 1.;
+  float minf = Inf;
   FOREACH {
     minf = min(abs(f${i}(pos)), minf);
   }
   // test for a false positive
-  if (minf > sqrt(u_bounds) * 0.01) {return false;}
+  if (minf > 0.01) {return false;}
   vec3 xDir = vec3(NORMAL_D, 0.0, 0.0);
   vec3 yDir = vec3(0.0, NORMAL_D, 0.0);
   vec3 zDir = vec3(0.0, 0.0, NORMAL_D);
   FOREACH {
     if (mint == t${i}) {
-        norm = normalize(
+        norm =  normalize(
         vec3(f${i}(pos+xDir)-f${i}(pos-xDir),
             f${i}(pos+yDir)-f${i}(pos-yDir),
             f${i}(pos+zDir)-f${i}(pos-zDir)));
@@ -231,43 +220,21 @@ bool testPoint(in Ray r, out vec3 pos, out vec3 norm, out float hue) {
 }
 
 bool marchRay(in Ray r, out vec3 position, out vec3 normal, out float hue) {
-  FOREACH {
-    float a0${i} = f${i}(r.origin);
-  }
   float n = -1.;
   for (int i = 0; i < MAX_STEPS; i++) {
     r.origin += r.direction * MIN_DIST;
-    if (length(r.origin) > u_bounds) {
+    // I multiply by 1.1 because otherwise it
+    // doesn't test when it should 
+    if (length(r.origin) > u_bounds * 1.1) {
       if (testPoint(r, position, normal, hue))
         return true;
       else 
         return false;
     }
-    FOREACH {
-      float a${i} = f${i}(r.origin);
-      if (a${i} * a0${i} <= 0. || abs(a${i}) < MIN_DIST)
-        if (testPoint(r, position, normal, hue))
-          return true;
-    }
+    if (testPoint(r, position, normal, hue))
+      return true;
   }
-  position = r.origin;
   return false;
-}
-
-// adapted from https://stackoverflow.com/questions/9234724/how-to-change-hue-of-a-texture-with-glsl
-// This is not accurate
-vec3 hue_rotate_(in vec3 c, in float hue) {
-  const mat3 rgb2yiq = mat3(0.299, 0.587, 0.114, 0.595716, -0.274453, -0.321263, 0.211456, -0.522591, 0.311135);
-  const mat3 yiq2rgb = mat3(1.0, 0.9563, 0.6210, 1.0, -0.2721, -0.6474, 1.0, -1.1070, 1.7046);
-  vec3 yColor = rgb2yiq * c; 
-
-  float originalHue = atan(yColor.b, yColor.g);
-  float finalHue = originalHue + hue * 2. * pi;
-
-  float chroma = sqrt(yColor.b*yColor.b+yColor.g*yColor.g);
-
-  vec3 yFinalColor = vec3(yColor.r, chroma * cos(finalHue), chroma * sin(finalHue));
-  return yiq2rgb*yFinalColor;
 }
 
 // adapted from https://stackoverflow.com/questions/9234724/how-to-change-hue-of-a-texture-with-glsl
@@ -315,6 +282,7 @@ vec3 shade(in vec3 p, in vec3 n, in Ray r, in float hue) {
   vec3 color3 = vec3(0.1804, 0.8275, 0.6314);
   const vec3 sunDir = normalize(vec3(0.8549, 0.7176, 0.2667));
   float diffuse = abs(dot(n, sunDir));
+  // unused as it does not fit the look
   // vec3 reflection = 2.0 * dot(n, -1.0 * sunDir) * n - sunDir;
   // reflection = normalize(reflection);
   // vec3 camera = r.direction;rho = csin(bxyz) + a
@@ -323,32 +291,47 @@ vec3 shade(in vec3 p, in vec3 n, in Ray r, in float hue) {
     mix(color1, color2, abs(p.x / u_bounds)),
     color3,
     diffuse);
-  return hue_rotate(grad, hue);
+  // TODO: make this act more like ambient occlusion
+  return hue_rotate(grad, hue) * min(1.0, length(p) / u_bounds * 0.2 + 0.8);
 }
 
 void drawAxes(in Ray fromCamera, in float t) {
+  // TODO: add support for scaling
   if (u_line_width < 0.01) return;
   vec3 intercept = -fromCamera.origin / fromCamera.direction;
-  if (intercept.x < 0.0) {intercept.x = 100000.0;}
-  if (intercept.y < 0.0) {intercept.y = 100000.0;}
-  if (intercept.z < 0.0) {intercept.z = 100000.0;}
+  if (intercept.x < 0.0) {intercept.x = Inf;}
+  if (intercept.y < 0.0) {intercept.y = Inf;}
+  if (intercept.z < 0.0) {intercept.z = Inf;}
+  vec3 spacing = u_spacing * u_scale;
   if (!(t < intercept.x)) {
     vec3 hit = fromCamera.origin + fromCamera.direction * intercept.x;
-    if (!(length(hit) > u_bounds) && (mod(hit.y, 1.0) < u_line_width || mod(hit.z, 1.0) < u_line_width)) {
+    if (
+      !(length(hit) > u_bounds) && 
+     (mod(hit.y + u_line_width * 0.5, spacing.y) < u_line_width * spacing.y || 
+      mod(hit.z + u_line_width * 0.5, spacing.z) < u_line_width * spacing.z)
+    ) {
       Color.rgb = mix(Color.rgb, vec3(0.0), 0.1);
       Color.a += 0.1;
     }
   }
   if (!(t < intercept.y)) {
     vec3 hit = fromCamera.origin + fromCamera.direction * intercept.y;
-    if (!(length(hit) > u_bounds) && (mod(hit.x, 1.0) < u_line_width || mod(hit.z, 1.0) < u_line_width)) {
+    if (
+      !(length(hit) > u_bounds) &&
+     (mod(hit.x + u_line_width * 0.5, spacing.x) < u_line_width * spacing.x || 
+      mod(hit.z + u_line_width * 0.5, spacing.z) < u_line_width * spacing.z)
+    ) {
       Color.rgb = mix(Color.rgb, vec3(0.0), 0.1);
       Color.a += 0.1;
     }
   }
   if (!(t < intercept.z)) {
     vec3 hit = fromCamera.origin + fromCamera.direction * intercept.z;
-    if (!(length(hit) > u_bounds) && (mod(hit.y, 1.0) < u_line_width || mod(hit.x, 1.0) < u_line_width)) {
+    if (
+      !(length(hit) > u_bounds) && 
+     (mod(hit.y + u_line_width * 0.5, spacing.y) < u_line_width * spacing.y || 
+      mod(hit.x + u_line_width * 0.5, spacing.x) < u_line_width * spacing.x)
+    ) {
       Color.rgb = mix(Color.rgb, vec3(0.0), 0.1);
       Color.a += 0.1;
     }
@@ -385,7 +368,7 @@ void main() {
   if (!testInequality(pos, normal, hue))
     // we have hit the bounds, so march through them
     if (!marchRay(Ray(pos, fromCamera.direction), pos, normal, hue)) {
-      drawAxes(fromCamera, 10000.0);
+      drawAxes(fromCamera, Inf);
       return;
     }
   Color.a = 1.0;

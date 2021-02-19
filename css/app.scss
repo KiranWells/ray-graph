@@ -41,6 +41,8 @@ body, html {
   overflow: hidden;
   font-weight: 500;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, Noto Sans, sans-serif;
+  width: 100%;
+  height: 100%;
 }
 
 main {
@@ -51,8 +53,8 @@ main {
 
 .side-container {
   position: fixed;
-  max-width: 20em;
-  width: 30%;
+  max-width: 50vw;
+  width: max-content;
   min-width: 12em;
   top: 0px;
   left: 0px;
@@ -72,7 +74,6 @@ main {
     box-sizing: border-box;
     border-radius: inherit;
     width: 100%;
-    // background: #FFF2;
     padding: 1em;
 
     label {
@@ -124,8 +125,6 @@ main {
 }
 
 button#addFunction {
-  // width: 2em;
-  // height: 2em;
   padding: .5em;
   border: none;
   background-color: $mainBack;
@@ -137,14 +136,18 @@ button#addFunction {
   font-weight: normal;
 }
 
-#mainControls {
+#controlsContainer {
   position: fixed;
+  bottom: 1em;
+  width: 100%;
+}
+
+#mainControls {
   display: flex;
   flex-wrap: wrap;
   max-width: 70%;
-  // margin-right: calc(50% - 10em);
-  bottom: 1em;
-  left: calc(50% - 10em);
+  width: max-content;
+  margin: auto;
   border-radius: 1em;
   padding: .5em;
   background-color: $mainBack;
@@ -154,15 +157,14 @@ button#addFunction {
 
   .dragger {
     box-sizing: border-box;
-    width: 6em;
-    height: 6em;
-    // margin-right: .5em;
+    width: 7em;
+    height: 5em;
     margin: .25em;
     border-radius: .5em;
     background-color: $innerBack;
     text-align: center;
     padding: .2em;
-    padding-top: 1em;
+    padding-top: 0.75em;
 
     .dragger-name {
       display: block;
@@ -201,6 +203,7 @@ button#addFunction {
   backdrop-filter: $blur;
   font-size: .6em;
   max-height: calc(100vh - 4em);
+  overflow: auto;
 
   .dragger {
     box-sizing: border-box;
@@ -440,4 +443,12 @@ button:hover {
 
 button:active {
   background: #ccc8 !important;
+}
+
+// custom math input:
+.mq-editable-field {
+  border: none !important;
+  background-color: $innerBack;
+  padding: .3em;
+  border-radius: .3em;
 }

@@ -6,10 +6,13 @@
   <link rel="stylesheet" href="css/app.css">
   <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="css/src/mathquill.css">
   <!-- <script src="https://cdn.jsdelivr.net/npm/stats-js@1.0.1/build/stats.min.js"></script> -->
   <script src="scripts/src/jquery-3.3.1.min.js"></script>
+  <script src="scripts/src/mathquill.min.js"></script>
   <script src="scripts/webglutils.js"></script>
   <script src="scripts/elements.js"></script>
+  <script src="scripts/parser.js"></script>
   <script src="scripts/app.js"></script>
   <script src="scripts/tutorials.js" defer="defer"></script>
   <title>RayGraph</title>
@@ -20,8 +23,9 @@
       <img src="favicon.png" alt="Logo" width="64" height="64">
       <h1>RayGraph</h1>
       <p class="subtitle">A Raytraced 3D Graphing Utility</p>
+      <span class="math">\sin\left(r\rho\right)\ge x^y</span>
       <p>By using a customing rendering engine, this program can graph 
-        nearly any equation you can think of. No need to solve for z!</p>
+        nearly any equation you can think of, including the one above.</p>
         <p id="phoneWarning">
           Warning: you seem to be using this with a small
           device. Unfortunately, this application is not fully stable on some
@@ -93,7 +97,8 @@
         <p>Here are a few tips to get started:</p>
         <ul>
           <li>If the function disappears, try increasing size or adding in a variable to experiment with</li>
-          <li>Use division sparingly. The computer doesn't like dividing by 0, so try multiplying both sides to cancel out division</li>
+          <li>Use division sparingly. Dividing by 0 will result in <span class="math">\Infinity</span>, leading to wierd shapes, 
+            so try multiplying both sides to cancel out division</li>
           <li>Enjoy!</li>
         </ul>
         </p>
@@ -128,7 +133,8 @@
         <p>New functions can be added by clicking the "+" button beneath the function list.</p>
         <p>
           An equation can include specific variables and mathematic operations, as long as it is valid mathematically.
-          Special variables include x, y, z, r, rho, theta, and phi (and pi, e). The rest of the letters will 
+          Special variables include x, y, z, r, rho (<span class="math">\rho</span>), theta (<span class="math">\theta</span>), and phi - the angle (<span class="math">\phi</span>).
+          Special constants are: pi (<span class="math">\pi</span>), phi_0 - the constant (<span class="math">\phi_0</span>), and e. The rest of the letters will 
           be represented as constants, which can be changed in the variables bar. 
         </p>
       </div>
@@ -138,14 +144,14 @@
           Some special functions are also 
           available, including trigonometric functions and others such as: ln, round, floor, mod, step, and smoothstep.
           (The last few are only included because they work by default. If you are unfamiliar with them, you can check 
-          the GLSL reference pages for each). Inverse trig functions have a- or arc- as a prefix (acos, arctan); hyperbolic 
+          the GLSL reference pages for each). Inverse trig functions have arc- as a prefix (arccos, arctan); hyperbolic 
           have -h as a suffix (sinh).
         </p>
         <p>
-          Normal math symbols also work, including +, -, *, and /. Exponentiation is ^, and sqrt is avilable, 
-          but ^0.5 is more stable. Dividing by a special variable will often lead to artifacts in the image; try to
-          multiply both sides to eliminate it. Theta and Phi are defined from -2pi to 2pi. R is sqrt(x^2 + y^2), and 
-          rho is the radius in 3 dimensions (sqrt(x^2 + y^2 + z^2)).
+          Normal math symbols also work, including +, -, *, and /. Exponentiation is ^ (Shift-6), and sqrt <span class="math">\sqrt{x}</span> is avilable, 
+          but <span class="math">x^{0.5}</span> is more stable. Dividing by a special variable will often lead to artifacts in the image; try to
+          multiply both sides to eliminate it. Theta and Phi are defined from <span class="math">-2\pi</span> to <span class="math">2\pi</span>. R is <span class="math">\sqrt{x^2 + y^2}</span>, and 
+          rho is the radius in 3 dimensions (<span class="math">\sqrt{x^2 + y^2 + z^2}</span>).
         </p>
       </div>
       <div id="aslide5">
@@ -157,8 +163,8 @@
         </p>
         <p>
           Variables are a great way to see how different numbers can affect a function. For example, using the equation 
-          'y = mx + b' will allow you to visually see how different slopes (m) and y-intercepts (b) affect the shape of the 
-          line. Or, for a more detailed example, try '(x-a)^2/f^2 + (y-b)^2/f^2 = (z - d)^2/c^2' to see how each constant affects
+          <span class="math">y = mx + b</span> will allow you to visually see how different slopes (m) and y-intercepts (b) affect the shape of the 
+          line. Or, for a more detailed example, try <span class="math">(\frac{(x-a)^2}{f^2}) + (\frac{(y-b)^2}{f^2} = \frac{(z - d)^2}{c^2}</span> to see how each constant affects
           the shape of a cone.
         </p>
       </div>
@@ -195,6 +201,11 @@
         </ul>
         </p>
       </div>
+      <div id="aslide8">
+        <h3>Interesting Functions:</h3>
+        <span class="math">xxyyzz\ =\ be^{a\rho }-c</span>
+        <span class="math">\sin \left(\rho r\right)=e^yx^z</span>
+      </div>
       <button class="back">Back</button>
       <button class="next">Next</button>
     </div>
@@ -205,7 +216,9 @@
     </div>
     <button id="addFunction"><i class="material-icons">add_box</i></button>
   </div>
-  <div id="mainControls">
+  <div id="controlsContainer">
+    <div id="mainControls">
+    </div>
   </div>
   <div id="variables">
   </div>
@@ -218,8 +231,9 @@
       using the boxes on the side. You can use the following special names in an equation:
       <ul>
         <li>x, y, and z</li>
-        <li>r (= sqrt(x<sup>2</sup> + y<sup>2</sup>))</li>
-        <li>rho, theta, and phi</li>
+        <li>r (<span class="math">= \sqrt{x^2 + y^2}</span>)</li>
+        <li>rho (<span class="math">\rho</span>), theta (<span class="math">\theta</span>), and phi - the angle (<span class="math">\phi</span>)</li>
+        <li>pi (<span class="math">\pi</span>), phi_0 - the constant (<span class="math">\phi_0</span>), and e</li>
       </ul>
       In addition, most trig functions are available, including sin, 
       arctan, and cosh (hyperbolic cos). Some other functions, such as 
