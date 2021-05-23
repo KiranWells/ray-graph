@@ -1,4 +1,6 @@
-# RayGraph
+![Logo](logo.svg)
+
+[View the website here](https://kiranwells.github.io/ray-graph/)
 
 A raytraced 3D graphing utility that aims to have incredible flexibility.
 

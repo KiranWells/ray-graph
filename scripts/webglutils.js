@@ -53,7 +53,6 @@ class WebGlUtils {
 
     var success = this.gl.getShaderParameter(fragmentShader, this.gl.COMPILE_STATUS);
     if (!success) {
-      notify("Improper equation! Make sure to format it correctly");
       console.log(this.gl.getShaderInfoLog(fragmentShader));
       this.gl.deleteShader(fragmentShader);
     }
@@ -234,15 +233,18 @@ class WebGlUtils {
  * @class
  */
 class ComputeShader {
+  _originalCode = "";
   _code = "";
   _program;
   // the basic code for the vertex shader
+  // renders all vertices directly at z = 0.5
   _vertexShaderCode =
-    "#version 300 es\nin vec2 a_corner;void main(){gl_Position=vec4(a_corner,0.5,1.0);}";
+    "#version 300 es\nin vec2 v;void main(){gl_Position=vec4(v,.5,1.);}";
   _triangleData = [];
   _uniforms = {};
   _textures = [];
   _canvas;
+  _defines = {};
   buffer;
   gl;
   width = null;
@@ -274,17 +276,19 @@ class ComputeShader {
   }
 
   /**
-   * sets the code to run and compiles it
+   * the code to run in the fragment shader
    * @param {string} fragmentCode
+   * @property
    */
   set code(fragmentCode) {
-    this._code = fragmentCode;
+    this._originalCode = fragmentCode;
     this._compile();
   }
 
   /**
-   * a method to set the canvas and context
+   * the canvas to be rendered with
    * @param {HTMLCanvasElement} canvasEl
+   * @property
    */
   set canvas(canvasEl) {
     this._canvas = canvasEl;
@@ -292,13 +296,31 @@ class ComputeShader {
   }
 
   /**
-   * a method to set the canvas and context
+   * a function which is called when compilation fails
    * @param {Function} onerror
+   * @property
    */
   set onerror(onerror) {
     if (typeof(onerror) !== "function")
       onerror = (message) => {console.log(message)};
     this._onerror = onerror;
+  }
+
+  /**
+   * the preprocessor macros which will be defined in the shader
+   * @param {Any} object - a key-value set of defines (null is treated as no value)
+   * @property
+   */
+  set defines(object) {
+    this._defines = {};
+    if (object == undefined || object == null) return;
+    for (let key in object) {
+      if (object[key] !== undefined && object[key] !== null)
+        this._defines[key] = object[key];
+      else
+        this._defines[key] = "";
+    }
+    this._compile();
   }
 
   /**
@@ -404,17 +426,47 @@ class ComputeShader {
   }
 
   /**
+   * Prepares the code for compilation, adding preprocessor definitions
+   * @private
+   */
+  _precompile() {
+    if (this._originalCode.length === 0) return;
+    if (this._defines.length !== 0) {
+      // insert the defines after the #version directive
+      let definesStr = "";
+      for (let key in this._defines) {
+        let val = this._defines[key];
+        definesStr += `#define ${key} ${val}\n`;
+      }
+      let versionIndex = this._originalCode.indexOf("#version");
+      if (versionIndex === -1) {
+        // insert at the beginning
+        this._code = definesStr + this._originalCode;
+      } else {
+        // get the location after index of the first newline after version
+        let afterVersion = this._originalCode.substr(versionIndex).indexOf("\n") + versionIndex + 1;
+        this._code = this._originalCode.substr(0, afterVersion) + "\n" + definesStr + this._originalCode.substr(afterVersion);
+      }
+    } else {
+      this._code = this._originalCode;
+    }
+  }
+
+  /**
    * Compiles the code and sets the program for rendering
    * @returns {any} Whether the compilation has succeeded
    * @private
    */
   _compile() {
-    // create the this.gl shader sections
-    if (!this.gl) {
+    // prepare the code for compilation
+    this._precompile();
+
+    if (!this.gl || !this._code) {
       // can't compile, exit
       return;
     }
 
+    // create the gl shader sections
     // vertex
     var vertexShader = this.gl.createShader(this.gl.VERTEX_SHADER);
     this.gl.shaderSource(vertexShader, this._vertexShaderCode);
@@ -426,7 +478,7 @@ class ComputeShader {
     if (!success) {
       console.warn(this.gl.getShaderInfoLog(vertexShader));
       this.gl.deleteShader(vertexShader);
-      let lines = this._code.split("\n");
+      let lines = this._vertexShaderCode.split("\n");
       let text = "";
       for (let i in lines) {
         text += `${i}: ${lines[i]}\n`
@@ -473,7 +525,7 @@ class ComputeShader {
       this.gl.STATIC_DRAW
     );
     // pass the basic triangle data to the shader
-    const cornerLocation = this.gl.getAttribLocation(this._program, "a_corner");
+    const cornerLocation = this.gl.getAttribLocation(this._program, "v");
 
     this.gl.vertexAttribPointer(cornerLocation, 2, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(cornerLocation);
@@ -528,7 +580,7 @@ class ComputeShader {
         this.gl.uniform1iv(uniform.location, val);
         break;
 
-        case "ivec2":
+      case "ivec2":
         this.gl.uniform2iv(uniform.location, uniform.value);
         break;
 
@@ -550,7 +602,7 @@ class ComputeShader {
   /**
    * Sets a specific texture
    * @param {number} unit - the unit to bind to
-   * @param {any} texture - the unit to bind to
+   * @param {any} texture - the texture to bind in
    * @private
    */
   _passTexture(unit, texture) {

@@ -21,23 +21,98 @@ var data = {
   },
   settings: {
     u_bounds: 5,
-    u_step_size: 0.25,
+    u_step_size: 0.1,
     u_line_width: 0.06,
     u_spacing: 1.0,
     u_scale: [1,1,1],
   },
-  variables: {
-  }
+  variables: {}
 };
 
 window.onload = function () {
 
 //#region initialization------------------------//
 
+  // setup functions/equations
+  let funcs = [];
+
+  function setFuncColors() {
+    // the colors are redistributed from 0-1
+    for (let i in funcs) {
+      let e = funcs[i];
+      let hue = i / (funcs.length);
+      e.hue = hue;
+    }
+  }
+
+  function removeEq(id) {
+    for (let e of funcs.slice(id)) {
+      // corrects the reference location to ensure they are correctly removed
+      e.id--;
+    }
+    funcs.splice(id,1);
+    setFuncColors();
+    processMainShaderCode();
+  }
+
+  $("#addFunction").on("click", () => {
+    addEquation();
+    setFuncColors();
+    processMainShaderCode();
+  });
+
+  function addEquation(equation) {
+    let e = new Equation((t) => {
+      processMainShaderCode();
+    }, removeEq, funcs.length, equation);
+    funcs.push(e);
+    document.getElementById("functionContainer").appendChild(e.rootelement);
+  }
+
+  // get settings from URL
+  var url_options = window.location.search.split(/[&?]/);
+  for (var el in url_options) {
+    var string = url_options[el];
+    if (string === "") continue;
+    let ind = string.indexOf("=");
+    var name = string.slice(0, ind);
+    let val = string.slice(ind + 1);
+
+    switch (name) {
+      case "eqs":
+        // handle a single element or an array
+        let streqs = decodeURIComponent(val);
+        if (!streqs.match(/[\][]/)) {
+          addEquation(streqs);
+        } else {
+          let eqs = JSON.parse(streqs);
+          for (let e of eqs) {
+            addEquation(e);
+          }
+        }
+        break;
+      case "zoom":
+        data.cameraUniforms.u_zoom = Number(decodeURIComponent(val));
+        break;
+      case "size":
+        data.settings.u_bounds = Number(decodeURIComponent(val));
+        break;
+      case "angles":
+        data.cameraUniforms.u_angles = JSON.parse(decodeURIComponent(val));
+        break;
+      default:
+        console.warn(`URI Option ${name} not supported. Ignoring.`)
+    }
+  }
+
+  if (funcs.length === 0) {
+    addEquation();
+  }
+
   // setup page elements
   let boundsdragger = new Dragger((n) => {
     let prevn = data.settings.u_bounds;
-    // TODO: Make the bounds more logmarthmic
+    // TODO: Make the bounds more logmarthmic - possibly
     data.settings.u_bounds = n;//Math.pow(1.1, n);
     data.cameraUniforms.u_zoom = (data.cameraUniforms.u_zoom / prevn) * data.settings.u_bounds;
     data.settings.u_spacing = Math.pow(10, Math.round(Math.log10(data.settings.u_bounds)) - 1);
@@ -90,83 +165,15 @@ window.onload = function () {
     // .append(zscaledragger.element)
     .append(zoomdragger.element);
   
-    if (window.innerWidth > 650) {
+    if (!navigator.userAgent.toLowerCase().match(/mobile/i)) {
       //assume we are using a computer
       zoomdragger.element.style.display = "none";
     }
 
-  let funcs = [];
-
-  function setFuncColors() {
-    for (let i in funcs) {
-      let e = funcs[i];
-      let hue = i / (funcs.length - 0.5);
-      e.hue = hue;
-    }
-  }
-
-  function removeEq(id) {
-    for (let e of funcs.slice(id)) {
-      // corrects the reference location to ensure they are correctly removed
-      e.id--;
-    }
-    funcs.splice(id,1);
-    setFuncColors();
-    processMainShaderCode();
-  }
-
-
-  $("#addFunction").on("click", () => {
-    funcs.push(new Equation((t) => {
-      processMainShaderCode();
-    }, removeEq, funcs.length));
-    setFuncColors();
-    processMainShaderCode();}
-  )
-  // get settings from URL
-  var url_options = window.location.search.split(/[&?]/);
-  for (var el in url_options) {
-    var string = url_options[el];
-    if (string === "") continue;
-    let ind = string.indexOf("=");
-    var name = string.slice(0, ind);
-    let val = string.slice(ind + 1);
-
-    switch (name) {
-      case "eqs":
-        let streqs = decodeURIComponent(val);
-        if (!streqs.match(/[\][]/)) {
-          funcs.push(new Equation((t) => {
-            processMainShaderCode();
-          }, removeEq, funcs.length, streqs));
-        } else {
-          let eqs = JSON.parse(streqs);
-          for (let e of eqs) {
-            funcs.push(new Equation((t) => {
-              processMainShaderCode();
-            }, removeEq, funcs.length, e));
-          }
-        }
-        break;
-      case "zoom":
-        data.cameraUniforms.u_zoom = Number(decodeURIComponent(val));
-        break;
-      case "angles":
-        data.cameraUniforms.u_angles = JSON.parse(decodeURIComponent(val));
-        break;
-      default:
-        console.warn(`URI Option ${name} not supported. Ignoring.`)
-    }
-  }
-
-  if (funcs.length === 0) {
-    funcs.push(new Equation((t) => {
-      processMainShaderCode();
-    }, removeEq, funcs.length));
-  }
-
   setFuncColors();
 
+  // setup the constants in the corner
+  // I call them variables because they are user-changed
   let variables = {};
   
   function addVariable(name, latex) {
@@ -199,9 +206,7 @@ window.onload = function () {
     }
   }
 
-  addVariable("u_a");
-
-  //general setup
+  // graphics setup
   const canvas = $("canvas")[0];
   const glu = new WebGlUtils(canvas);
   glu.resizeCanvas();
@@ -212,15 +217,19 @@ window.onload = function () {
   }
 
   let mainShader = new ComputeShader(canvas);
+
+  if (navigator.userAgent.toLowerCase().match(/mobile/i))
+    mainShader.defines = {"MOBILE":""};
+
   mainShader.onerror = (m) => {
     message("Invalid function!");
     console.log(m);
   };
 
-  //load code into each shader
+  //load code for the fragment shader
   $.get("shaders/main.frag", function(response){
     data.loadedShaderCode = response;
-    //make the shader (It needs to be processed with the added functions)
+    // make the shader (It needs to be processed with the added functions)
     processMainShaderCode();
   });
 
@@ -233,15 +242,14 @@ window.onload = function () {
 //#region renderloop----------------------------//
   window.requestAnimationFrame(check);
 
-  //used to render only every other frame
-  //decreases the max framerate to 30, but 
-  //decreases how demanding it is
+  // used to render only every other frame
+  // decreases the max framerate to 30, but 
+  // decreases how demanding it is
   var flipFlop = true;
   function check() {
-    //see if the scene has changed, and if so, render
-    //this saves a lot of processing power
+    // see if the scene has changed, and if so, render
+    // this saves a lot of processing power
     window.requestAnimationFrame(check);
-    //setTimeout(check, 5000);
     let loaded = mainShader.loaded;
     if (data.animate) {
       data.cameraUniforms.u_angles[0]++;
@@ -267,22 +275,14 @@ window.onload = function () {
 //#endregion renderloop
 
 //#region input handling------------------------//
-  //TODO: handle inputs
-
   data.event = {
     pressed: false,
     sensitivity: 0.5,
-    prevMouse: [0,0],
-    onup: null
+    prevMouse: [0,0]
   }
 
   function bodyup(e) {
     data.event.pressed = false;
-    if (data.event.onup) {
-      // handle up events from other objects
-      data.event.onup(e);
-      data.event.onup = null;
-    }
   }
 
   function canvasdown(e) {
@@ -292,7 +292,6 @@ window.onload = function () {
 
   function canvasmove(e) {
     if (data.event.pressed) {
-      // TODO: add setting for sensitivity
       if (!data.animate) {
         data.cameraUniforms.u_angles[0] -= (e.clientX - data.event.prevMouse[0]) * data.event.sensitivity;
       }
@@ -305,7 +304,7 @@ window.onload = function () {
   }
 
   function canvasscroll(e) {
-    data.cameraUniforms.u_zoom += e.originalEvent.deltaY * data.event.sensitivity * data.cameraUniforms.u_zoom / 15.;
+    data.cameraUniforms.u_zoom += e.originalEvent.deltaY * data.event.sensitivity * data.cameraUniforms.u_zoom / 150.;
     data.didChange = true;
   }
 
@@ -317,6 +316,9 @@ window.onload = function () {
   $("body").on("touchmove", (e) => {canvasmove({clientX: e.touches[0].clientX,clientY: e.touches[0].clientY})});
   $("canvas").on("wheel", canvasscroll);
 
+  // fragment code management
+
+  // returns a string of uniforms which represents the variables
   function getVariables() {
     let res = "";
     for (let e in data.variables) {
@@ -351,6 +353,8 @@ window.onload = function () {
     await sleep(1);
     let funclist = funcs;
     let textlist = [];
+
+    // parse each equation, then add the necessary uniforms to `variables`
     hideVariables();
     for (let i in funclist) {
       let e = funclist[i];
@@ -364,9 +368,12 @@ window.onload = function () {
         if (!(name == "u_phi_0")) // to allow it to be a constant
           addVariable(name, latexname);
       }
-      textlist.push(`${eq.replace(/\\/g, "")}`);
+      textlist.push(eq);
     }
+    // add in variables as uniforms
     let sourcecode = format(data.loadedShaderCode, {variables: getVariables()});
+
+    // custom preprocessor to handle the changes for each function
     while (sourcecode.indexOf("FOREACH") >= 0) {
       let index = sourcecode.indexOf("FOREACH");
       let start = index + "FOREACH".length;
@@ -385,11 +392,14 @@ window.onload = function () {
         }
       }
       let inner = sourcecode.substr(start + 1, end - start - 2);
+
+      // loop through each equation, substituting in the necessary variables
       let replace = "";
       for (let i in textlist) {
         let eq = textlist[i];
+        // default to not solid
         let ineq = "false";
-        
+
         if (eq.match(/(<|>|<=|>=)/)) {
           var tempList = eq.split(/(<=|>=)/);
           if (tempList.length == 1){
@@ -409,14 +419,57 @@ window.onload = function () {
     data.didChange = true;
   }
 
+  // save the canvas to an image and open 
+  // it in a new tab
   function save(e) {
     render();
     let url = canvas.toDataURL();
-    window.open(url);
+    let image = new Image();
+    image.src = url;
+    let w = window.open();
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = "graph";
+    a.textContent = "Download";
+    a.id = "download";
+    setTimeout(function(){
+      w.document.write("<title>Saved Image</title>")
+      w.document.write(image.outerHTML);
+      w.document.write(a.outerHTML);
+      w.document.write(`
+        <style>
+          body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+          }
+          img {
+            margin: 1em;
+          }
+          #download {
+            border-radius: .25em;
+            padding: .5em;
+            color: black; /*rgb(80, 235, 126)*/
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, Noto Sans, sans-serif;
+            background: white;
+            box-shadow: 2px 2px 5px 0 #0004;
+            height: min-content;
+            width: min-content;
+            display: block;
+            text-decoration: none;
+          }
+          #download:hover {
+            box-shadow: 1px 1px 3px 0 #0004;
+          }
+        </style>
+      `);
+    }, 0);
   }
 
   $("#download").on("click", save);
 
+  // copy a URL with the current settings to the clipboard
   function link(e) {
     let eqList = [];
 
@@ -431,6 +484,7 @@ window.onload = function () {
     url += `?eqs=[${eqs}]`;
     url += `&angles=[${data.cameraUniforms.u_angles}]`;
     url += `&zoom=${data.cameraUniforms.u_zoom}`;
+    url += `&size=${data.settings.u_bounds}`;
     // the string needs to be doubly escaped to be valid JSON
     url = encodeURI(url.replace(/\\/g, "\\\\"));
     message("Copied URL to Clipboard");
@@ -440,18 +494,29 @@ window.onload = function () {
 
   $("#link").on("click", link);
 //#endregion input handling
-
-  function message(text) {
-    let m = document.createElement("div");
-    m.classList.add("message");
-    m.innerHTML = text;
-    m.onclick = () => {
-      document.body.removeChild(m);
-    }
-    setTimeout(() => {
-      m.style.opacity = 0;
-      setTimeout(m.onclick, 2000);
-    }, 3000);
-    document.body.appendChild(m);
-  }
 };
+
+// a more convenient alert for the user
+function message(text, location, dontfade) {
+  let m = document.createElement("div");
+  m.classList.add("message");
+  if (location !== undefined) {
+    m.style.left = location.left + "px" || "auto";
+    m.style.right = location.right + "px" || "auto";
+    m.style.bottom = location.bottom + "px" || "auto";
+    m.style.top = location.top + "px" || "auto";
+    console.log(m.style)
+  }
+  m.innerHTML = text;
+  m.onclick = () => {
+    m.style.opacity = 0;
+    setTimeout(() => {
+      if (document.body.contains(m))
+        document.body.removeChild(m);
+    }, 2000);
+  }
+  if (!dontfade) {
+    setTimeout(m.onclick, 3000);
+  }
+  document.body.appendChild(m);
+}

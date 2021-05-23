@@ -1,3 +1,7 @@
+/**
+ * Handles the tutorial screens as a slideshow
+ */
+
 let qora = "";
 let slideN = 0;
 
@@ -86,6 +90,10 @@ $(".next").on("click", () => {
 $("#showTutorial").on("click", () => {
   $("#titleScreen").css("display", "flex");
   slideN = 0;
+  message("Set the function to display here", {top: 55, left: 150}, true);
+  message("Add a new function to display with this button", {top: 110, left: 60}, true);
+  message("Modify constants by clicking and dragging here", {top: 0, right: 90}, true);
+  message("Change settings such as the size of the view below", {bottom: 70, left: window.innerWidth / 2 - 270}, true);
 });
 
 $("#skip").on("touchstart", () => {
@@ -116,8 +124,17 @@ $(".next").on("touchstart", () => {
 $("#showTutorial").on("touchstart", () => {
   $("#titleScreen").css("display", "flex");
   slideN = 0;
+  message("Set the function to display here", {top: 55, left: 150}, true);
+  message("Add a new function to display with this button", {top: 110, left: 60}, true);
+  message("Modify constants by clicking and dragging here", {top: 0, right: 90}, true);
+  message("Change settings such as the size of the view below", {bottom: 70, left: window.innerWidth / 2 - 270}, true);
 });
 
 if (localStorage.getItem("tutorial") === "true") {
   $("#titleScreen").css("display", "none");
+} else {
+  message("Set the function to display here", {top: 55, left: 150}, true);
+  message("Add a new function to display with this button", {top: 110, left: 60}, true);
+  message("Modify constants by clicking and dragging here", {top: 0, right: 90}, true);
+  message("Change settings such as the size of the view below", {bottom: 70, left: window.innerWidth / 2 - 270}, true);
 }

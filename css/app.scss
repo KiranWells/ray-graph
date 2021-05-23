@@ -55,7 +55,6 @@ main {
   position: fixed;
   max-width: 50vw;
   width: max-content;
-  min-width: 12em;
   top: 0px;
   left: 0px;
   margin: 2em;
@@ -75,6 +74,8 @@ main {
     border-radius: inherit;
     width: 100%;
     padding: 1em;
+    display: flex;
+    align-items: center;
 
     label {
       display: inline-block;
@@ -87,6 +88,7 @@ main {
       padding-left:  .6em;
       margin-right: .5em;
       font-style: italic;
+      flex-shrink: 0;
     }
     
     input[type="text"] {
@@ -114,7 +116,7 @@ main {
       padding-top: 0;
       margin-left: .5em;
       font-weight: 500;
-      translate: 0 .2em;
+      flex-shrink: 0;
 
       .material-icons {
         font-size: small;
@@ -175,7 +177,7 @@ button#addFunction {
     }
 
     .material-icons {
-      translate: 0 .3em;
+      transform: translate(0, .3em);
     }
   }
 }
@@ -227,7 +229,7 @@ button#addFunction {
     }
 
     .material-icons {
-      translate: 0 .3em;
+      transform: translate(0, .3em);
     }
   }
 }
@@ -271,7 +273,8 @@ button#addFunction {
       border-radius: .5em;
 
       .material-icons {
-        translate: 0 .25em;
+        display: inline-block;
+        transform: translate(0, .25em);
         margin-right: .2em;
       }
     }
@@ -298,8 +301,9 @@ button#addFunction {
   div {
     display: none;
     position: absolute;
-    width: 50vw;
-    min-width: 250px;
+    max-width: 500px;
+    width: max-content;
+    min-width: 30vw;
     padding: 1em;
     margin-bottom: 0%;
     bottom: 0;
@@ -326,7 +330,7 @@ button#addFunction {
   padding: .5em;
 
   .material-icons {
-    translate: 0 -.2em;
+    display: block;
   }
 }
 
@@ -366,7 +370,7 @@ button#addFunction {
       font-size: smaller;
     }
     img {
-      translate: -.5em 1em;
+      transform: translate(-.5em, 1em);
       display: inline;
     }
   }
@@ -389,7 +393,9 @@ button#addFunction {
   right: 0;
   bottom: 0;
   margin: 2em;
+  height: min-content;
   max-height: 3em;
+  width: max-content;
   background-color: $innerBack;
   text-align: right;
   padding: .5em;
@@ -397,6 +403,10 @@ button#addFunction {
   border-radius: .5em;
   transition: ease .7s;
   backdrop-filter: $blur;
+
+  .material-icons {
+    translate: 0 .2em;
+  }
 }
 
 @mixin thumb {

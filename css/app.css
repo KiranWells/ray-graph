@@ -50,7 +50,6 @@ main {
   width: -webkit-max-content;
   width: -moz-max-content;
   width: max-content;
-  min-width: 12em;
   top: 0px;
   left: 0px;
   margin: 2em;
@@ -73,6 +72,12 @@ main {
   border-radius: inherit;
   width: 100%;
   padding: 1em;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
 }
 
 #functionContainer .function label {
@@ -87,6 +92,8 @@ main {
   padding-left: .6em;
   margin-right: .5em;
   font-style: italic;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
 }
 
 #functionContainer .function input[type="text"] {
@@ -116,7 +123,8 @@ main {
   padding-top: 0;
   margin-left: .5em;
   font-weight: 500;
-  translate: 0 .2em;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
 }
 
 #functionContainer .function button .material-icons {
@@ -187,7 +195,8 @@ button#addFunction {
 }
 
 #mainControls .dragger .material-icons {
-  translate: 0 .3em;
+  -webkit-transform: translate(0, 0.3em);
+          transform: translate(0, 0.3em);
 }
 
 #phoneWarning {
@@ -245,7 +254,8 @@ button#addFunction {
 }
 
 #variables .dragger .material-icons {
-  translate: 0 .3em;
+  -webkit-transform: translate(0, 0.3em);
+          transform: translate(0, 0.3em);
 }
 
 #save {
@@ -292,7 +302,9 @@ button#addFunction {
 }
 
 #save div button .material-icons {
-  translate: 0 .25em;
+  display: inline-block;
+  -webkit-transform: translate(0, 0.25em);
+          transform: translate(0, 0.25em);
   margin-right: .2em;
 }
 
@@ -318,8 +330,11 @@ button#addFunction {
 #help div {
   display: none;
   position: absolute;
-  width: 50vw;
-  min-width: 250px;
+  max-width: 500px;
+  width: -webkit-max-content;
+  width: -moz-max-content;
+  width: max-content;
+  min-width: 30vw;
   padding: 1em;
   margin-bottom: 0%;
   bottom: 0;
@@ -347,7 +362,7 @@ button#addFunction {
 }
 
 #help .material-icons, #addFunction .material-icons, #save .material-icons {
-  translate: 0 -.2em;
+  display: block;
 }
 
 #titleScreen, #tutorials {
@@ -397,7 +412,8 @@ button#addFunction {
 }
 
 #titleScreen #title img, #tutorials #title img {
-  translate: -.5em 1em;
+  -webkit-transform: translate(-0.5em, 1em);
+          transform: translate(-0.5em, 1em);
   display: inline;
 }
 
@@ -418,7 +434,13 @@ button#addFunction {
   right: 0;
   bottom: 0;
   margin: 2em;
+  height: -webkit-min-content;
+  height: -moz-min-content;
+  height: min-content;
   max-height: 3em;
+  width: -webkit-max-content;
+  width: -moz-max-content;
+  width: max-content;
   background-color: #FFFC;
   text-align: right;
   padding: .5em;
@@ -428,6 +450,10 @@ button#addFunction {
   transition: ease .7s;
   -webkit-backdrop-filter: blur(20px);
           backdrop-filter: blur(20px);
+}
+
+.message .material-icons {
+  translate: 0 .2em;
 }
 
 input[type="range"] {

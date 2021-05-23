@@ -20,25 +20,21 @@
 <body>
   <div id="titleScreen">
     <div id="title">
-      <img src="favicon.png" alt="Logo" width="64" height="64">
-      <h1>RayGraph</h1>
-      <p class="subtitle">A Raytraced 3D Graphing Utility</p>
-      <span class="math">\sin\left(r\rho\right)\ge x^y</span>
-      <p>By using a customing rendering engine, this program can graph 
-        nearly any equation you can think of, including the one above.</p>
+      <img src="logo.svg" alt="Logo" width="337.5" height="150">
         <p id="phoneWarning">
           Warning: you seem to be using this with a small
           device. Unfortunately, this application is not fully stable on some
-          phones. There may be some visual artifacting; I am working to fix this.
+          phones. Please use a computer or a wireless mouse for best results.
         </p>
-        <button id="quickStart">
-          Quick Start
-        </button>
-        <button id="advancedTutorial">
+        <!-- <button id="advancedTutorial">
           Advanced Tutorial
+        </button> -->
+        <p></p>
+        <button id="quickStart">
+          Tutorial
         </button>
         <button id="skip">
-          Skip
+          Close
         </button>
     </div>
   </div>
@@ -69,13 +65,13 @@
         </p>
       </div>
       <div id="qslide2">
-        <h3>Variables</h3>
+        <h3>Constants</h3>
         <p>
-          Each variable in the top right bar can be changed by 
+          Each constant in the top right bar can be changed by 
           clicking and dragging or scrolling.
         </p>
         <p>
-          New variables appear when you use them in an equation. Variables can
+          New constants appear when you use them in an equation. Constants can
           be used in multiple functions; they will all hold the same value.
         </p>
       </div>
@@ -83,7 +79,7 @@
         <h3>Settings</h3>
         <p>
           The settings bar on the bottom controls the way the graph looks, and 
-          each one can be changed just like the variables.
+          each one can be changed just like the constants.
         </p>
         <p>
           Precision changes how accurate the graph is; 
@@ -96,8 +92,8 @@
         <h3>One last thing:</h3>
         <p>Here are a few tips to get started:</p>
         <ul>
-          <li>If the function disappears, try increasing size or adding in a variable to experiment with</li>
-          <li>Use division sparingly. Dividing by 0 will result in <span class="math">\Infinity</span>, leading to wierd shapes, 
+          <li>If the function disappears, try increasing size or adding in a constant to experiment with</li>
+          <li>Use division sparingly. Dividing by 0 will result in <span class="math">\infty</span>, leading to rendering errors, 
             so try multiplying both sides to cancel out division</li>
           <li>Enjoy!</li>
         </ul>
@@ -116,12 +112,12 @@
         <h3>Controls</h2>
         <p>There are only a few main controls, but they aim to be as flexible as possible.</p>
         <p>In the top left corner is the function bar. It holds all of the various equations you are 
-          currently graphing. Beneath it is the add function button. In the top right is that variable 
-          bar. This holds all of the variables that you include in your functions. On the bottom is the 
+          currently graphing. Beneath it is the add function button. In the top right is that constant 
+          bar. This holds all of the constants that you include in your functions. On the bottom is the 
           settings bar. It holds the global settings that control the look and feel of the grapher.</p>
         <p>In the bottom left is the save button. It allows you to save a url link to the functions you are 
           using or to download a transparent picture of the function. In the bottom right is a help button.
-          Hovering over it shows a quick help text detailing the things you can put in a function. An speaking of...</p>
+          Hovering over it shows a quick help text detailing the things you can put in a function. And speaking of...</p>
       </div>
       <div id="aslide3">
         <h3>Functions</h2>
@@ -135,7 +131,7 @@
           An equation can include specific variables and mathematic operations, as long as it is valid mathematically.
           Special variables include x, y, z, r, rho (<span class="math">\rho</span>), theta (<span class="math">\theta</span>), and phi - the angle (<span class="math">\phi</span>).
           Special constants are: pi (<span class="math">\pi</span>), phi_0 - the constant (<span class="math">\phi_0</span>), and e. The rest of the letters will 
-          be represented as constants, which can be changed in the variables bar. 
+          be represented as constants, which can be changed in the constants bar. 
         </p>
       </div>
       <div id="aslide4">
@@ -150,21 +146,21 @@
         <p>
           Normal math symbols also work, including +, -, *, and /. Exponentiation is ^ (Shift-6), and sqrt <span class="math">\sqrt{x}</span> is avilable, 
           but <span class="math">x^{0.5}</span> is more stable. Dividing by a special variable will often lead to artifacts in the image; try to
-          multiply both sides to eliminate it. Theta and Phi are defined from <span class="math">-2\pi</span> to <span class="math">2\pi</span>. R is <span class="math">\sqrt{x^2 + y^2}</span>, and 
-          rho is the radius in 3 dimensions (<span class="math">\sqrt{x^2 + y^2 + z^2}</span>).
+          multiply both sides to eliminate it. The variables 'theta' and 'phi' are defined from <span class="math">-2\pi</span> to <span class="math">2\pi</span>. The letter 'r' is <span class="math">\sqrt{x^2 + y^2}</span>, and 
+          'rho' is the radius in 3 dimensions (<span class="math">\sqrt{x^2 + y^2 + z^2}</span>).
         </p>
       </div>
       <div id="aslide5">
-        <h3>Variables</h3>
+        <h3>Constants</h3>
         <p>
-          Up in the top right corner is the variables bar. This will hold all the letters which are treated as constants
+          Up in the top right corner is the constants bar. This will hold all the letters which are treated as constants
           in the equation. Clicking and dragging (or scrolling) these boxes will change the value of that number across
-          all functions. New variables will appear as soon as you use them in an equation. 
+          all functions. New constants will appear as soon as you use them in an equation. 
         </p>
         <p>
-          Variables are a great way to see how different numbers can affect a function. For example, using the equation 
+          Constants are a great way to see how different numbers can affect a function. For example, using the equation 
           <span class="math">y = mx + b</span> will allow you to visually see how different slopes (m) and y-intercepts (b) affect the shape of the 
-          line. Or, for a more detailed example, try <span class="math">(\frac{(x-a)^2}{f^2}) + (\frac{(y-b)^2}{f^2} = \frac{(z - d)^2}{c^2}</span> to see how each constant affects
+          line. Or, for a more detailed example, try <span class="math">\frac{(x-a)^2}{f^2} + \frac{(y-b)^2}{f^2} = \frac{(z - d)^2}{c^2}</span> to see how each constant affects
           the shape of a cone.
         </p>
       </div>
@@ -179,7 +175,8 @@
         <p>
           The precision slider changes how accurate the graph is. This is low by default to improve performance, and 
           should only need increasing if strange artifacts appear in the graph's shape. This generally happens when there are
-          very small details. Increasing this slider should fix that, but it will cost performance on some machines.
+          divisions by 0, or functions which have asymptotes. Increasing this slider should fix that, but it will cost 
+          performance on some machines.
         </p>
       </div>
       <div id="aslide7">
@@ -187,7 +184,7 @@
         <p>
           The save button in the bottom left will allow you to save the current equations you are looking at. 
           The "Copy URL" option will copy a shareable URL to the clipboard with the current equations and the 
-          camera position. The "Download" button will open a new tab with a transparent-background PNG image
+          camera position. The "Save Photo" button will open a new tab with a transparent-background PNG image
           of what is currently being displayed.
         </p>
       </div>
@@ -195,7 +192,7 @@
         <h3>One last thing:</h3>
         <p>Here are a few tips to get started:</p>
         <ul>
-          <li>If the function disappears, try increasing size or adding in a variable to experiment with</li>
+          <li>If the function disappears, try increasing size or adding in a constant to experiment with</li>
           <li>Use division sparingly. The computer doesn't like dividing by 0, so try multiplying both sides to cancel out division</li>
           <li>Enjoy!</li>
         </ul>
@@ -227,7 +224,7 @@
     <!-- TODO: add help message and possibly a tutorial -->
     <div>
       The function box will accept any input that is a valid equation.
-      Letters (aside from x,y,z, and r) are variables that can be adjusted
+      Letters (aside from x,y,z, and r) are constants that can be adjusted
       using the boxes on the side. You can use the following special names in an equation:
       <ul>
         <li>x, y, and z</li>
@@ -244,7 +241,7 @@
   <div id="save">
     <i class="material-icons">save</i>
     <div>
-      <button id="download"><i class="material-icons">save_alt</i> Download</button>
+      <button id="download"><i class="material-icons">save_alt</i> Save Photo</button>
       <button id="link"><i class="material-icons">link</i>Copy Link</button>
     </div>
   </div>

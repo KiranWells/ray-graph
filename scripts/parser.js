@@ -1,8 +1,10 @@
 /**
- * A module for parsing the latex code into GLSL
+ * A module for parsing latex code into GLSL
  */
 
 "use strict";
+
+let functions = /(pow|cust_pow|sin|cos|tan|sec|csc|cot|asin|acos|atan|sinh|cosh|tanh|log|floor|fract|mod|max|min|step|smoothstep|round|float|abs)/g;
 
 /**
  * Divides a latex string into independent tokens for 
@@ -15,7 +17,7 @@ function splitTokens(latexStr) {
     // in order of precedence:
     space: /\\? /g,
     bracket: /[[\](){}]/g,
-    operator: /[+\-*/^_,]/g,
+    operator: /[+\-*/^_,]|\\%/g,
     comparison: /(<=|>=|<|>|=)|\\(lt|le|eq|gt|ge)(?![a-zA-Z])/g,
     number: /(\d+\.?\d*|\d*\.?\d+)/g,
     escape: /\\[a-zA-Z]+\b/g,
@@ -25,7 +27,6 @@ function splitTokens(latexStr) {
   let extractedTokens = [];
   let tries = 0, LIMIT = 1000;
   while (latexStr.length > 0 && tries < LIMIT) {
-    console.log(latexStr);
     for (let type in tokenTypes) {
       let tkn = tokenTypes[type];
       if (latexStr.search(tkn) === 0) {
@@ -70,15 +71,15 @@ function convertToken(token) {
         return "u_" + s.replace(/[{}]/g, "");
       }
     case "operator":
+      if (s == "\\%") 
+        return "%";
       return s;
     case "escape":
       let specialVars = /(rho|theta|phi|pi)/g;
-      let functions = /(sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|log|floor|mod|max|min|step|smoothstep|round|float|int|abs)/g;
       let keywords = new RegExp(`${specialVars.source}|${functions.source}`, "g");
       let specialCases = /(cdot|ln)/g;
       if (s.match(keywords)) {
         // convert arc trig to asin, acos, atan
-        // TODO: add sec csc and cot support
         s = s.replace(/arc(sin|cos|tan)/g, "a$1");
         return s.slice(1);
       } else if (s.match(specialCases)) {
@@ -160,10 +161,12 @@ function insert(arr, obj, ind) {
  * - phi: atan(z/r)  
  * - pi: the mathematical constant  
  * - e: the mathematical constant  
+ * - u_phi_0: the mathematical constant phi  
  * @param {String} latexStr - the string to parse (assumed to be valid LaTeX)
  */
 function latex2GLSL(latexStr) {
-  let spec = /(pow|cust_pow|asin|acos|atan|log|floor|mod|max|min|step|smoothstep|round|float|int|abs)/g;
+  // fix all of the functions which are not escaped in mathquill
+  let spec = /(pow|cust_pow|asin|acos|atan|log|floor|fract|mod|max|min|step|smoothstep|round|float|abs)/g;
   latexStr = latexStr.replace(spec, "\\$1");
   let tokens = splitTokens(latexStr);
   // we wrap the entire equation in a set of parentheses to 
@@ -175,7 +178,7 @@ function latex2GLSL(latexStr) {
   for (let i = 0; i < glslTokens.length;i++) {
     let el = glslTokens[i];
     let prevEl = glslTokens[i - 1] || "+";
-    // manage all of the multi-token changes, such as power
+    // manage all of the multi-token changes, such as fraction
     if (el.match(/\\[a-zA-Z]+\b/)) {
       switch (el.slice(1)) {
         case "frac":
@@ -191,15 +194,19 @@ function latex2GLSL(latexStr) {
           continue;
       }
     }
-    if (el == "^") {
+    if (el == "^" || el == "%") {
       // we need to rearrange like this:
       // (...) ^ (...)
       // cust_pow((...), (...))
+      let new_func = el == "^" ? "cust_pow" : "mod";
       let after = getNextParentheses(glslTokens, i + 1);
       let before = getNextParentheses(glslTokens, i - 1, true);
+      if (glslTokens[before - 1].match(functions)) {
+        before--;
+      }
       let temp = glslTokens.slice(0,before);
       temp.push(
-        "cust_pow", "(", 
+        new_func, "(", 
         ...glslTokens.slice(before, i), 
         ",", 
         ...glslTokens.slice(i + 1, after), 
@@ -207,15 +214,18 @@ function latex2GLSL(latexStr) {
         ...glslTokens.slice(after));
       glslTokens = temp;
     }
-    if (el == "_") {
-      //TODO: add subscripted variable support
-    }
     //update the element and previous element, as they may have changed
     el = glslTokens[i];
     prevEl = glslTokens[i - 1] || "*";
-    if (!prevEl.match(/[+\-*,/]|<|<=|=|>=|>/) && !el.match(/[+\-*,/]|<|<=|=|>=|>/)) {
+    if (el == "(" && (glslTokens[i + 1] == ")" || glslTokens[i + 1] == "\\right")) {
+      // remove the empty parenthases
+      let num = glslTokens[i + 1] == "\\right" ? 3: 2;
+      glslTokens.splice(i,num);
+      i -= num;
+      continue;
+    }
+    if (!prevEl.match(/[+\-*,/%]|<|<=|=|>=|>/) && !el.match(/[+\-*,/%]|<|<=|=|>=|>/)) {
       // could need a multiplication sign
-      let functions = /(pow|cust_pow|sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|log|floor|mod|max|min|step|smoothstep|round|float|int|abs)/g;
       if (!prevEl.match(functions) && !(prevEl == "(") && !(el == ")")) {
         glslTokens = insert(glslTokens, "*", i);
       }
